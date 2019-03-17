@@ -1,2 +1,8 @@
+# local profile files
+etc
+
 # IntelliJ IDEA files
 *.iml
+
+# Target folder
+target
