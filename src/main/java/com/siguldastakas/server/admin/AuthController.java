@@ -9,10 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ModelAndView;
 import spark.Route;
+import spark.Session;
 import spark.TemplateViewRoute;
 
 import javax.naming.NamingException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthController {
 
@@ -32,7 +35,6 @@ public class AuthController {
     public static Route login = (req, res) -> {
         String token = req.queryParams("token");
         if (token != null) {
-
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                     .setAudience(Collections.singletonList(googleApiClientId))
                     .build();
@@ -46,6 +48,18 @@ public class AuthController {
             }
         }
         return null;
+    };
+
+
+    public static TemplateViewRoute logout = (req, res) -> {
+        Session session = req.session();
+        session.invalidate();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("googleApiClientId", googleApiClientId);
+        data.put("loginPath", Path.path(req, Path.LOGIN));
+
+        return new ModelAndView(data, "logout.ftl");
     };
 
 }
