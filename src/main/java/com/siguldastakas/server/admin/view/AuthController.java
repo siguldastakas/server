@@ -47,6 +47,7 @@ public class AuthController {
                     if (DataModel.instance().isAdmin(email)) {
                         Session session = req.session(true);
                         session.attribute("email", email);
+                        session.attribute("name", payload.get("name"));
                         res.redirect(Path.path(req, Path.SERIES));
                         return "Welcome!";
                     }

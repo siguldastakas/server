@@ -12,10 +12,14 @@ public class Path {
         return path(request.contextPath(), path);
     }
 
+    public static String path(Request request) {
+        return path(request, null);
+    }
+
     public static String path(String context, String path) {
         StringBuilder sb = new StringBuilder();
         if (context != null) sb.append(context);
-        sb.append(path);
+        if (path != null) sb.append(path);
         return sb.toString();
     }
 

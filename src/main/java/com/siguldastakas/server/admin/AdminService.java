@@ -21,6 +21,8 @@ public class AdminService implements SparkApplication {
     private static final Logger log = LoggerFactory.getLogger(AdminService.class);
 
     public void init() {
+        staticFiles.location("/static/admin");
+
         try {
             DataModel.Initialize(Paths.get((String) ContextHelper.lookup("dataPath")));
 

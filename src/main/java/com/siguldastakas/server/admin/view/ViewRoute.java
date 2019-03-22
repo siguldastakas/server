@@ -1,5 +1,6 @@
 package com.siguldastakas.server.admin.view;
 
+import com.siguldastakas.server.admin.Path;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
@@ -35,6 +36,9 @@ public interface ViewRoute extends TemplateViewRoute {
         user.put("email", req.session().attribute("email"));
         user.put("name", req.session().attribute("name"));
         model.put("user", user);
+
+        model.put("context", Path.path(req));
+        model.put("logout", Path.path(req, Path.LOGOUT));
 
         handle(model, req, res);
 

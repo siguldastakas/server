@@ -1,0 +1,39 @@
+* {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    vertical-align: bottom;
+}
+
+.width-limit {
+    width: 800px;
+    margin: auto;
+}
+
+@media only screen and (max-width: 809px) {
+    .width-limit {
+        width: calc(100vw - 10px);
+        padding: 0 5px;
+    }
+}
+
+header {
+    border-bottom: solid 1px silver;
+    padding: 5px 0;
+}
+
+nav ul {
+    padding: 0;
+    list-style: none;
+    float: right;
+    line-height: 30px;
+    font-size: 10pt;
+}
+
+nav ul li {
+    display: inline-block;
+    padding-left: 10px;
+}
