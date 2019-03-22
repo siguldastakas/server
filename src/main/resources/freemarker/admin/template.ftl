@@ -18,8 +18,9 @@
         </ul>
     </nav>
 </header>
-
+<main class="width-limit">
 <#nested/>
+</main>
 </body>
 </html>
 </#macro>

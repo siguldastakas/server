@@ -1,11 +1,17 @@
 package com.siguldastakas.server.admin.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class DataModel {
 
@@ -22,12 +28,16 @@ public class DataModel {
     }
 
     private static final String ADMINS = "admins.json";
+    private static final String SERIES = "series";
+    private static final String INFO = "info.json";
 
-    private final ObjectMapper mapper = new ObjectMapper();;
+    private final ObjectMapper mapper;
     private Path dataPath;
 
     private DataModel(Path dataPath) {
         this.dataPath = dataPath;
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
     }
 
     public boolean isAdmin(String email) {
@@ -43,6 +53,29 @@ public class DataModel {
             log.error("Failed to read admins.json", e);
         }
         return false;
+    }
+
+    public Series[] allSeries() {
+        List<Series> list = new ArrayList<>();
+
+        try {
+            synchronized (mapper) {
+                for (Iterator<Path> it = Files.walk(dataPath.resolve(SERIES), 1).filter(Files::isDirectory).iterator(); it.hasNext(); ) {
+                    Path dir = it.next();
+                    Path infoPath = dir.resolve(INFO);
+                    File infoFile = infoPath.toFile();
+                    if (infoFile.exists()) {
+                        Series series = mapper.readValue(infoFile, Series.class);
+                        list.add(series);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("Failed to read series", e);
+        }
+
+        list.sort((o1, o2) -> - o1.date.compareTo(o2.date));
+        return list.toArray(new Series[0]);
     }
 
 }

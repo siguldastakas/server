@@ -1,4 +1,19 @@
 <#include 'template.ftl'>
 <@html>
-hello!
+    <section>
+        <table>
+            <thead>
+                <tr>
+                    <th class="left">Seriāls</th>
+                </tr>
+            </thead>
+            <tbody>
+                <#list series as item>
+                    <tr>
+                        <td><a href="">${item.name}</a></td>
+                    </tr>
+                </#list>
+            </tbody>
+        </table>
+    </section>
 </@>
