@@ -1,21 +1,22 @@
-package com.siguldastakas.server.admin;
+package com.siguldastakas.server.admin.view;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.siguldastakas.server.ContextHelper;
+import com.siguldastakas.server.admin.ContextHelper;
+import com.siguldastakas.server.admin.Path;
+import com.siguldastakas.server.admin.data.DataModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.ModelAndView;
-import spark.Route;
-import spark.Session;
-import spark.TemplateViewRoute;
+import spark.*;
 
 import javax.naming.NamingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static spark.Spark.halt;
 
 public class AuthController {
 
@@ -43,23 +44,38 @@ public class AuthController {
                 GoogleIdToken.Payload payload = idToken.getPayload();
                 if (Boolean.TRUE.equals(payload.getEmailVerified())) {
                     String email = payload.getEmail();
-                    return email;
+                    if (DataModel.instance().isAdmin(email)) {
+                        Session session = req.session(true);
+                        session.attribute("email", email);
+                        res.redirect(Path.path(req, Path.SERIES));
+                        return "Welcome!";
+                    }
                 }
             }
         }
+        res.redirect(Path.path(req, Path.LOGOUT));
         return null;
     };
 
 
     public static TemplateViewRoute logout = (req, res) -> {
-        Session session = req.session();
-        session.invalidate();
+        Session session = req.session(false);
+        if (session != null) session.invalidate();
 
         Map<String, Object> data = new HashMap<>();
         data.put("googleApiClientId", googleApiClientId);
         data.put("loginPath", Path.path(req, Path.LOGIN));
 
         return new ModelAndView(data, "logout.ftl");
+    };
+
+    public static Filter filter = (req, res) -> {
+        Session session = req.session(false);
+        String email = session != null ? session.attribute("email") : null;
+        if (email == null) {
+            res.redirect(Path.path(req, Path.LOGIN));
+            halt();
+        }
     };
 
 }

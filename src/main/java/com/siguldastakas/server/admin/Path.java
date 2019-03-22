@@ -4,8 +4,6 @@ import spark.Request;
 
 public class Path {
 
-    public static String prefix;
-
     public static String path(String path) {
         return path((String) null, path);
     }
@@ -17,12 +15,13 @@ public class Path {
     public static String path(String context, String path) {
         StringBuilder sb = new StringBuilder();
         if (context != null) sb.append(context);
-        sb.append(prefix);
         sb.append(path);
         return sb.toString();
     }
 
     public static final String LOGIN = "/login";
     public static final String LOGOUT = "/logout";
+
+    public static final String SERIES = "/series";
 
 }

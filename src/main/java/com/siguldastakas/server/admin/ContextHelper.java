@@ -1,4 +1,4 @@
-package com.siguldastakas.server;
+package com.siguldastakas.server.admin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
