@@ -35,7 +35,9 @@ public class AdminService implements SparkApplication {
             get(Path.path(Path.LOGOUT), AuthController.logout, freemarker);
 
             before(Path.path(Path.SERIES), AuthController.filter);
+            before(Path.path(Path.SERIES, "*"), AuthController.filter);
             get(Path.path(Path.SERIES), SeriesController.list, freemarker);
+            get(Path.path(Path.SERIES, ":path"), SeriesController.view, freemarker);
 
         } catch (NamingException e) {
             log.error("Failed to setup admin panel!", e);

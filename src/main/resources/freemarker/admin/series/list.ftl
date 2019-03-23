@@ -1,4 +1,4 @@
-<#include 'template.ftl'>
+<#include '../template.ftl'>
 <@html>
     <section>
         <table>
@@ -10,7 +10,7 @@
             <tbody>
                 <#list series as item>
                     <tr>
-                        <td><a href="">${item.name}</a></td>
+                        <td><a href="${link}/${item.path}">${item.name}</a></td>
                     </tr>
                 </#list>
             </tbody>

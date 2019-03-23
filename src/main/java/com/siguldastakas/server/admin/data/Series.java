@@ -10,8 +10,18 @@ public class Series {
     public String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate date;
+    public Event[] events;
+
+    public String getPath() {
+        return path;
+    }
 
     public String getName() {
         return name;
     }
+
+    public Event[] getEvents() {
+        return events;
+    }
+
 }

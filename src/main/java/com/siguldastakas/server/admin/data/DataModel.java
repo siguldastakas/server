@@ -78,4 +78,17 @@ public class DataModel {
         return list.toArray(new Series[0]);
     }
 
+    public Series series(String path) {
+        try {
+            synchronized (mapper) {
+                Path infoPath = dataPath.resolve(SERIES).resolve(path).resolve(INFO);
+                return mapper.readValue(infoPath.toFile(), Series.class);
+            }
+        } catch (IOException e) {
+            log.error("Failed to read series", e);
+        }
+
+        return null;
+    }
+
 }

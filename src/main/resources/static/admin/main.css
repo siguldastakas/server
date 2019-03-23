@@ -31,7 +31,6 @@ header {
 }
 
 main {
-    padding-top: 10px;
     font-size: 14px;
 }
 
@@ -52,6 +51,7 @@ section {
     border-radius: 2px;
     background: white;
     padding: 15px 10px;
+    margin: 10px 0;
 }
 
 table {
@@ -70,7 +70,7 @@ th, td {
 }
 
 th {
-    border-bottom: solid 1px silver;
+    border-bottom: solid 2px silver;
 }
 
 th.left {
@@ -79,4 +79,9 @@ th.left {
 
 td {
     border-bottom: solid 0.5px silver;
+}
+
+td.number {
+    width: 20px;
+    text-align: right;
 }

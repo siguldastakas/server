@@ -16,16 +16,15 @@ public class Path {
         return path(request, null);
     }
 
-    public static String path(String context, String path) {
+    public static String path(String... path) {
         StringBuilder sb = new StringBuilder();
-        if (context != null) sb.append(context);
-        if (path != null) sb.append(path);
+        if (path != null) for (String item : path) if (item != null) sb.append('/').append(item);
         return sb.toString();
     }
 
-    public static final String LOGIN = "/login";
-    public static final String LOGOUT = "/logout";
+    public static final String LOGIN = "login";
+    public static final String LOGOUT = "logout";
 
-    public static final String SERIES = "/series";
+    public static final String SERIES = "series";
 
 }
