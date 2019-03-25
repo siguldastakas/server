@@ -3,16 +3,23 @@ package com.siguldastakas.server.admin.view;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.siguldastakas.server.admin.ContextHelper;
 import com.siguldastakas.server.admin.Path;
 import com.siguldastakas.server.admin.data.Event;
 import com.siguldastakas.server.admin.data.*;
 import com.siguldastakas.server.admin.iofxml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Route;
+import spark.Session;
 
+import javax.naming.NamingException;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
+import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static spark.Spark.halt;
@@ -21,6 +28,29 @@ public class EventController {
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
+    private static final java.nio.file.Path uploadPath;
+    private static final MultipartConfigElement multipartConfigElement;
+    static {
+        String path;
+        try {
+            path = ContextHelper.lookup("uploadPath");
+        } catch (NamingException e) {
+            log.error("Configuration uploadPath is not set.");
+            path = "/tmp";
+        }
+        uploadPath = Paths.get(path);
+        multipartConfigElement = new MultipartConfigElement(
+                uploadPath.toAbsolutePath().toString(),
+                2_097_152,
+                2_097_152,
+                0);
+    }
+
+    private static final String SESSION_FILE = "file";
+    private static final String SESSION_SERIES = "series";
+    private static final String SESSION_EVENT = "event";
+    private static final String SESSION_RESULTS = "results";
+
     public static final ViewRoute view = (model, req, res) -> {
         String path = req.params("path");
         String number = req.params("event");
@@ -28,6 +58,7 @@ public class EventController {
         if (event == null) halt(404);
 
         model.put("event", event);
+        model.put("saved", DataModel.instance().resultsSaved(path, event.number));
         model.put("upload", Path.path(req, Path.SERIES, path, number, "upload"));
         model.template("event/view.ftl");
     };
@@ -38,11 +69,28 @@ public class EventController {
         Event event = event(path, number);
         if (event == null) halt(404);
 
-        req.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement("/tmp"));
+        Session session = req.session();
+        String file = session.attribute("file");
+        if (file != null) {
+            File oldFile = uploadPath.resolve(file).toFile();
+            if (oldFile.exists()) oldFile.delete();
+        }
+
+        req.attribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+
         try {
             ObjectMapper mapper = new XmlMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ResultList resultList = mapper.readValue(req.raw().getPart("xml").getInputStream(), ResultList.class);
+
+            Part part = req.raw().getPart("xml");
+            file = String.valueOf(System.currentTimeMillis());
+            part.write(file);
+
+            session.attribute(SESSION_FILE, file);
+            session.attribute(SESSION_SERIES, path);
+            session.attribute(SESSION_EVENT, number);
+
+            ResultList resultList = mapper.readValue(part.getInputStream(), ResultList.class);
 
             List<RunnerClass> classes = new ArrayList<>(resultList.classResults.length);
 
@@ -132,12 +180,37 @@ public class EventController {
             EventResults eventResults = new EventResults();
             eventResults.classes = classes.stream().sorted().toArray(RunnerClass[]::new);
 
+            session.attribute(SESSION_RESULTS, eventResults);
+
             model.put("event", event);
             model.put("classes", eventResults.classes);
+            model.put("save", Path.path(req, Path.SERIES, path, number, "save"));
+            model.put("file", file);
             model.template("event/preview.ftl");
         } catch (IOException | ServletException e) {
             log.error("Failed to upload results", e);
         }
+    };
+
+    public static Route save = (req, res) -> {
+        String path = req.params("path");
+        String number = req.params("event");
+        Event event = event(path, number);
+        if (event == null) halt(404);
+
+        Session session = req.session();
+        String file = req.queryParams("file");
+
+        if (!path.equals(session.attribute(SESSION_SERIES))
+                || !number.equals(session.attribute(SESSION_EVENT))
+                || file == null || !file.equals(session.attribute(SESSION_FILE))) {
+            halt(500);
+        }
+
+        DataModel.instance().save(path, event.number, session.attribute(SESSION_RESULTS), uploadPath.resolve(file));
+
+        res.redirect(Path.path(req, Path.SERIES, path, number));
+        return "Saved!";
     };
 
     private static Event event(String path, String number) {

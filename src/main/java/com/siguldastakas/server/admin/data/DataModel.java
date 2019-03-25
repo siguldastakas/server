@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 public class DataModel {
 
     private static final Logger log = LoggerFactory.getLogger(DataModel.class);
@@ -30,6 +32,7 @@ public class DataModel {
     private static final String ADMINS = "admins.json";
     private static final String SERIES = "series";
     private static final String INFO = "info.json";
+    private static final String RESULTS = "results";
 
     private final ObjectMapper mapper;
     private Path dataPath;
@@ -95,6 +98,26 @@ public class DataModel {
         Series series = series(path);
         for (Event event : series.events) if (event.number == number) return event;
         return null;
+    }
+
+    public boolean resultsSaved(String path, int number) {
+        return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + ".json").toFile().exists();
+    }
+
+    public void save(String series, int event, EventResults results, Path xml) {
+        try {
+            synchronized (mapper) {
+                String name = RESULTS + event;
+                Path directory = dataPath.resolve(SERIES).resolve(series);
+                Path path1 = directory.resolve(name + ".json");
+                mapper.writeValue(path1.toFile(), results);
+
+                Path path2 = directory.resolve(name + ".xml");
+                Files.move(xml, path2, REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            log.error("Failed to write results", e);
+        }
     }
 
 }

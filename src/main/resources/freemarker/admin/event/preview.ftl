@@ -4,9 +4,10 @@
         <h1>${event.name}</h1>
     </section>
     <section>
-        <form action="" method="post" enctype="multipart/form-data">
-            <label>Pārbaudi rezultātus un saglabā!</label>
+        <form action="${save}" method="post">
+            <label class="warning">Pārbaudi rezultātus un saglabā!</label>
             <input type="submit" value="Saglabāt" style="float: right">
+            <input type="hidden" name="file" value="${file}">
         </form>
     </section>
     <#list classes as class>

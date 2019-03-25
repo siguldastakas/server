@@ -13,6 +13,7 @@ import spark.servlet.SparkApplication;
 import spark.template.freemarker.FreeMarkerEngine;
 
 import javax.naming.NamingException;
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.TimeZone;
 
@@ -27,6 +28,9 @@ public class AdminService implements SparkApplication {
         staticFiles.location("/static/admin");
 
         try {
+            String uploadPath = ContextHelper.lookup("uploadPath");
+            for (File file : Paths.get(uploadPath).toFile().listFiles(File::isFile)) file.delete();
+
             DataModel.Initialize(Paths.get((String) ContextHelper.lookup("dataPath")));
 
             Configuration configuration = new Configuration(Configuration.VERSION_2_3_26);
@@ -44,6 +48,7 @@ public class AdminService implements SparkApplication {
             get(Path.path(Path.SERIES, ":path"), SeriesController.view, freemarker);
             get(Path.path(Path.SERIES, ":path", ":event"), EventController.view, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "upload"), EventController.upload, freemarker);
+            post(Path.path(Path.SERIES, ":path", ":event", "save"), EventController.save);
 
         } catch (NamingException e) {
             log.error("Failed to setup admin panel!", e);
