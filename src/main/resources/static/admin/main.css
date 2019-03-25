@@ -61,10 +61,6 @@ table {
     border-bottom: solid 0.5px silver;
 }
 
-tr {
-    /*line-height: 30px;*/
-}
-
 th, td {
     padding: 10px 7px;
 }
@@ -83,5 +79,44 @@ td {
 
 td.number {
     width: 20px;
+    text-align: right;
+}
+
+.preview h2 {
+    font-size: 15px;
+}
+
+.preview th {
+    font-size: 11px;
+    padding: 7px;
+}
+
+.preview td {
+    font-size: 13px;
+    padding: 7px;
+}
+
+.preview .position {
+    width: 17px;
+    text-align: right;
+}
+
+.preview .name {
+    width: 170px;
+    text-align: left;
+}
+
+.preview .time {
+    width: 60px;
+    text-align: right;
+}
+
+.preview .status {
+    color: silver;
+    text-align: right;
+}
+
+.preview .points {
+    width: 40px;
     text-align: right;
 }

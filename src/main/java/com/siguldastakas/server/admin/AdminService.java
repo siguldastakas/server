@@ -1,7 +1,9 @@
 package com.siguldastakas.server.admin;
 
 import com.siguldastakas.server.admin.data.DataModel;
+import com.siguldastakas.server.admin.data.Event;
 import com.siguldastakas.server.admin.view.AuthController;
+import com.siguldastakas.server.admin.view.EventController;
 import com.siguldastakas.server.admin.view.SeriesController;
 import freemarker.template.Configuration;
 import org.slf4j.Logger;
@@ -38,6 +40,8 @@ public class AdminService implements SparkApplication {
             before(Path.path(Path.SERIES, "*"), AuthController.filter);
             get(Path.path(Path.SERIES), SeriesController.list, freemarker);
             get(Path.path(Path.SERIES, ":path"), SeriesController.view, freemarker);
+            get(Path.path(Path.SERIES, ":path", ":event"), EventController.view, freemarker);
+            post(Path.path(Path.SERIES, ":path", ":event", "upload"), EventController.upload, freemarker);
 
         } catch (NamingException e) {
             log.error("Failed to setup admin panel!", e);

@@ -91,4 +91,10 @@ public class DataModel {
         return null;
     }
 
+    public Event event(String path, int number) {
+        Series series = series(path);
+        for (Event event : series.events) if (event.number == number) return event;
+        return null;
+    }
+
 }

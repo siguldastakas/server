@@ -15,8 +15,8 @@
                 <#if series.events??>
                     <#list series.events as item>
                         <tr>
-                            <td class="number"><a href="">${item.number}</a></td>
-                            <td><a href="">${item.name}</a></td>
+                            <td class="number"><a href="${link}/${item.number}">${item.number}</a></td>
+                            <td><a href="${link}/${item.number}">${item.name}</a></td>
                         </tr>
                     </#list>
                 </#if>
