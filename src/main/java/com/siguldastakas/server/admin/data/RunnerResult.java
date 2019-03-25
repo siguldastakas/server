@@ -15,26 +15,16 @@ public class RunnerResult implements Comparable<RunnerResult> {
         return status;
     }
 
-    public String getTime() {
-        return formatTime(time);
+    public int getTime() {
+        return time;
     }
 
-    public String getTimeBehind() {
-        return formatTime(timeBehind);
+    public int getTimeBehind() {
+        return timeBehind;
     }
 
     public int getPosition() {
         return position;
-    }
-
-    private static String formatTime(int time) {
-        if (time == 0) return null;
-        int hours = time / 3600;
-        int minutes = time / 60 - hours * 60;
-        int seconds = time % 60;
-        return hours > 0
-                ? String.format("%d:%02d:%02d", hours, minutes, seconds)
-                : String.format("%d:%02d", minutes, seconds);
     }
 
     @Override

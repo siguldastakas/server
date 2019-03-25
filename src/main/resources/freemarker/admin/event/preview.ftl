@@ -29,15 +29,15 @@
                             <td class="left">${runner.club}</td>
                             <#if class.courses??>
                                 <#list runner.results as result>
-                                    <#if result.time??>
-                                        <td class="time">${result.time}</td>
+                                    <#if result.time gt 0>
+                                        <td class="time"><@time seconds=result.time /></td>
                                     <#else>
                                         <td class="status">${result.status}</td>
                                     </#if>
                                 </#list>
                             </#if>
-                            <#if runner.overall.time??>
-                                <td class="time">${runner.overall.time}</td>
+                            <#if runner.overall.time gt 0>
+                                <td class="time"><@time seconds=runner.overall.time /></td>
                             <#else>
                                 <td class="status">${runner.overall.status}</td>
                             </#if>

@@ -5,6 +5,7 @@ import com.siguldastakas.server.admin.data.Event;
 import com.siguldastakas.server.admin.view.AuthController;
 import com.siguldastakas.server.admin.view.EventController;
 import com.siguldastakas.server.admin.view.SeriesController;
+import com.siguldastakas.server.admin.view.TimeDirective;
 import freemarker.template.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class AdminService implements SparkApplication {
 
             Configuration configuration = new Configuration(Configuration.VERSION_2_3_26);
             configuration.setClassForTemplateLoading(AdminService.class, "/freemarker/admin");
+            configuration.setSharedVariable("time", new TimeDirective());
             FreeMarkerEngine freemarker = new FreeMarkerEngine(configuration);
 
             get(Path.path(Path.LOGIN), AuthController.form, freemarker);
