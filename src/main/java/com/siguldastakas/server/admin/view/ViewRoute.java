@@ -38,6 +38,7 @@ public interface ViewRoute extends TemplateViewRoute {
         model.put("user", user);
 
         model.put("context", Path.path(req));
+        model.put("home", Path.path(req, Path.SERIES));
         model.put("logout", Path.path(req, Path.LOGOUT));
 
         handle(model, req, res);

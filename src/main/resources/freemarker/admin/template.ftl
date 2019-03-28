@@ -11,7 +11,9 @@
 
 <header>
     <nav class="width-limit">
-        <img src="${context}/logo-1x.png" srcset="${context}/logo-2x.png 2x">
+        <a href="${home}">
+            <img src="${context}/logo-1x.png" srcset="${context}/logo-2x.png 2x">
+        </a>
         <ul class="pull-right">
             <li>${user.name}</li>
             <li><a href="${logout}">Iziet</a></li>
