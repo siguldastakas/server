@@ -42,12 +42,12 @@ public class EventController {
 
     private interface EventRoute extends Route {
         @Override
-        default Object handle(Request req, Response res) {
+        default Object handle(Request req, Response res) throws Exception {
             Object[] array = seriesAndEvent(req);
             return handle((Series) array[0], (Event) array[1], req, res);
         }
 
-        Object handle(Series series, Event event, Request req, Response res);
+        Object handle(Series series, Event event, Request req, Response res) throws Exception;
     }
 
     private static Object[] seriesAndEvent(Request req) {
@@ -91,7 +91,7 @@ public class EventController {
 
     public static final EventViewRoute view = (series, event, model, req, res) -> {
         model.put("event", event);
-        model.put("saved", DataModel.instance().resultsSaved(series.path, event.number));
+        model.put("saved", DataModel.instance().hasResults(series.path, event.number));
         model.put("upload", Path.path(req, Path.SERIES, series.path, String.valueOf(event.number), "upload"));
         model.template("event/view.ftl");
     };

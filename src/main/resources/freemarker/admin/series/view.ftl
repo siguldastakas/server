@@ -23,4 +23,9 @@
             </tbody>
         </table>
     </section>
+    <section>
+        <form action="${update}" method="post">
+            <input type="submit" value="Ģenerēt lapu">
+        </form>
+    </section>
 </@>

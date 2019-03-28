@@ -13,6 +13,8 @@ public class Page {
 
     protected static void process(Object model, String templateName, Path outputPath, String file) throws IOException {
         try {
+            if (!Files.exists(outputPath)) Files.createDirectory(outputPath);
+
             Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
             cfg.setClassForTemplateLoading(Page.class, "/freemarker/output");
             cfg.setDefaultEncoding("UTF-8");

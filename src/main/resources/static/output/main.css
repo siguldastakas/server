@@ -86,10 +86,4 @@ h1 {
 table.index {
     width: auto;
     margin: auto;
-    border: none;
-}
-
-table.index td {
-    border: none;
-    padding: 5px 0px;
 }

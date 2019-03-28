@@ -44,8 +44,9 @@ public class AdminService implements SparkApplication {
             before(Path.path(Path.SERIES, "*"), AuthController.filter);
 
             get(Path.path(Path.SERIES), SeriesController.list, freemarker);
-            post(Path.path(Path.SERIES, "update"), SeriesController.update);
+            post(Path.path(Path.SERIES, "update"), SeriesController.updateIndex);
             get(Path.path(Path.SERIES, ":path"), SeriesController.view, freemarker);
+            post(Path.path(Path.SERIES, ":path", "update"), SeriesController.updateSeries);
             get(Path.path(Path.SERIES, ":path", ":event"), EventController.view, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "upload"), EventController.upload, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "save"), EventController.save);

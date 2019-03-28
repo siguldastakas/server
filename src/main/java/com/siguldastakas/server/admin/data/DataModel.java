@@ -96,12 +96,16 @@ public class DataModel {
         return null;
     }
 
+    public boolean hasOverallResults(String path) {
+        return Files.exists(dataPath.resolve(SERIES).resolve(path).resolve(OVERALL));
+    }
+
     private Path resultsPath(String path, int number) {
         return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + ".json");
     }
 
-    public boolean resultsSaved(String path, int number) {
-        return resultsPath(path, number).toFile().exists();
+    public boolean hasResults(String path, int number) {
+        return Files.exists(resultsPath(path, number));
     }
 
     public EventResults results(String path, int number) {
