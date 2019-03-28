@@ -7,9 +7,13 @@ import com.siguldastakas.server.admin.ContextHelper;
 import com.siguldastakas.server.admin.Path;
 import com.siguldastakas.server.admin.data.Event;
 import com.siguldastakas.server.admin.data.*;
+import com.siguldastakas.server.admin.data.overall.OverallResults;
+import com.siguldastakas.server.admin.data.overall.OverallResultsBuilder;
 import com.siguldastakas.server.admin.iofxml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.Request;
+import spark.Response;
 import spark.Route;
 import spark.Session;
 
@@ -25,6 +29,40 @@ import java.util.*;
 import static spark.Spark.halt;
 
 public class EventController {
+
+    private interface EventViewRoute extends ViewRoute {
+        @Override
+        default void handle(Model model, Request req, Response res) {
+            Object[] array = seriesAndEvent(req);
+            handle((Series) array[0], (Event) array[1], model, req, res);
+        }
+
+        void handle(Series series, Event event, Model model, Request req, Response res);
+    }
+
+    private interface EventRoute extends Route {
+        @Override
+        default Object handle(Request req, Response res) {
+            Object[] array = seriesAndEvent(req);
+            return handle((Series) array[0], (Event) array[1], req, res);
+        }
+
+        Object handle(Series series, Event event, Request req, Response res);
+    }
+
+    private static Object[] seriesAndEvent(Request req) {
+        String path = req.params("path");
+        String number = req.params("event");
+        int eventNumber = Integer.parseInt(number);
+
+        Series series = DataModel.instance().series(path);
+        if (series == null) halt(404);
+
+        Event event = series.event(eventNumber);
+        if (event == null) halt(404);
+
+        return new Object[] { series, event };
+    }
 
     private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
@@ -51,24 +89,14 @@ public class EventController {
     private static final String SESSION_EVENT = "event";
     private static final String SESSION_RESULTS = "results";
 
-    public static final ViewRoute view = (model, req, res) -> {
-        String path = req.params("path");
-        String number = req.params("event");
-        Event event = event(path, number);
-        if (event == null) halt(404);
-
+    public static final EventViewRoute view = (series, event, model, req, res) -> {
         model.put("event", event);
-        model.put("saved", DataModel.instance().resultsSaved(path, event.number));
-        model.put("upload", Path.path(req, Path.SERIES, path, number, "upload"));
+        model.put("saved", DataModel.instance().resultsSaved(series.path, event.number));
+        model.put("upload", Path.path(req, Path.SERIES, series.path, String.valueOf(event.number), "upload"));
         model.template("event/view.ftl");
     };
 
-    public static final ViewRoute upload = (model, req, res) -> {
-        String path = req.params("path");
-        String number = req.params("event");
-        Event event = event(path, number);
-        if (event == null) halt(404);
-
+    public static final EventViewRoute upload = (series, event, model, req, res) -> {
         Session session = req.session();
         String file = session.attribute("file");
         if (file != null) {
@@ -87,8 +115,8 @@ public class EventController {
             part.write(file);
 
             session.attribute(SESSION_FILE, file);
-            session.attribute(SESSION_SERIES, path);
-            session.attribute(SESSION_EVENT, number);
+            session.attribute(SESSION_SERIES, series.path);
+            session.attribute(SESSION_EVENT, event.number);
 
             ResultList resultList = mapper.readValue(part.getInputStream(), ResultList.class);
 
@@ -178,13 +206,13 @@ public class EventController {
             }
 
             EventResults eventResults = new EventResults();
-            eventResults.classes = classes.stream().sorted().toArray(RunnerClass[]::new);
+            eventResults.classes = classes.stream().sorted(Comparator.comparing(o -> series.indexOfClass(o.name))).toArray(RunnerClass[]::new);
 
             session.attribute(SESSION_RESULTS, eventResults);
 
             model.put("event", event);
             model.put("classes", eventResults.classes);
-            model.put("save", Path.path(req, Path.SERIES, path, number, "save"));
+            model.put("save", Path.path(req, Path.SERIES, series.path, String.valueOf(event.number), "save"));
             model.put("file", file);
             model.template("event/preview.ftl");
         } catch (IOException | ServletException e) {
@@ -192,34 +220,32 @@ public class EventController {
         }
     };
 
-    public static Route save = (req, res) -> {
-        String path = req.params("path");
-        String number = req.params("event");
-        Event event = event(path, number);
-        if (event == null) halt(404);
-
+    public static EventRoute save = (series, event, req, res) -> {
         Session session = req.session();
         String file = req.queryParams("file");
 
-        if (!path.equals(session.attribute(SESSION_SERIES))
-                || !number.equals(session.attribute(SESSION_EVENT))
+        if (!series.path.equals(session.attribute(SESSION_SERIES))
+                || event.number != (int) session.attribute(SESSION_EVENT)
                 || file == null || !file.equals(session.attribute(SESSION_FILE))) {
             halt(500);
         }
 
-        DataModel.instance().save(path, event.number, session.attribute(SESSION_RESULTS), uploadPath.resolve(file));
+        EventResults results = session.attribute(SESSION_RESULTS);
+        DataModel.instance().save(series.path, event.number, results, uploadPath.resolve(file));
 
-        res.redirect(Path.path(req, Path.SERIES, path, number));
+        EventResults[] eventResults = new EventResults[series.events.length];
+        for (int e = 0; e < series.events.length; e++) {
+            Event otherEvent = series.events[e];
+            eventResults[e] = otherEvent.number == event.number
+                    ? results
+                    : DataModel.instance().results(series.path, otherEvent.number);
+        }
+        OverallResults overallResults = OverallResultsBuilder.build(series, eventResults);
+        DataModel.instance().save(series.path, overallResults);
+
+        res.redirect(Path.path(req, Path.SERIES, series.path, String.valueOf(event.number)));
         return "Saved!";
     };
-
-    private static Event event(String path, String number) {
-        try {
-            return DataModel.instance().event(path, Integer.parseInt(number));
-        } catch (NumberFormatException ignored) {
-            return null;
-        }
-    }
 
     private static RunnerResult.Status status(String string) {
         if ("OK".equals(string)) return RunnerResult.Status.OK;

@@ -2,6 +2,7 @@ package com.siguldastakas.server.admin.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.siguldastakas.server.admin.data.overall.OverallResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ public class DataModel {
     private static final String SERIES = "series";
     private static final String INFO = "info.json";
     private static final String RESULTS = "results";
+    private static final String OVERALL = "overall.json";
 
     private final ObjectMapper mapper;
     private Path dataPath;
@@ -94,21 +96,32 @@ public class DataModel {
         return null;
     }
 
-    public Event event(String path, int number) {
-        Series series = series(path);
-        for (Event event : series.events) if (event.number == number) return event;
-        return null;
+    private Path resultsPath(String path, int number) {
+        return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + ".json");
     }
 
     public boolean resultsSaved(String path, int number) {
-        return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + ".json").toFile().exists();
+        return resultsPath(path, number).toFile().exists();
     }
 
-    public void save(String series, int event, EventResults results, Path xml) {
+    public EventResults results(String path, int number) {
         try {
             synchronized (mapper) {
-                String name = RESULTS + event;
-                Path directory = dataPath.resolve(SERIES).resolve(series);
+                File file = resultsPath(path, number).toFile();
+                return file.exists() ? mapper.readValue(file, EventResults.class) : null;
+            }
+        } catch (IOException e) {
+            log.error("Failed to read series", e);
+        }
+
+        return null;
+    }
+
+    public void save(String path, int number, EventResults results, Path xml) {
+        try {
+            synchronized (mapper) {
+                String name = RESULTS + number;
+                Path directory = dataPath.resolve(SERIES).resolve(path);
                 Path path1 = directory.resolve(name + ".json");
                 mapper.writeValue(path1.toFile(), results);
 
@@ -117,6 +130,16 @@ public class DataModel {
             }
         } catch (IOException e) {
             log.error("Failed to write results", e);
+        }
+    }
+
+    public void save(String path, OverallResults results) {
+        try {
+            synchronized (mapper) {
+                mapper.writeValue(dataPath.resolve(SERIES).resolve(path).resolve(OVERALL).toFile(), results);
+            }
+        } catch (IOException e) {
+            log.error("Failed to write overall results", e);
         }
     }
 
