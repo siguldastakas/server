@@ -1,7 +1,6 @@
 package com.siguldastakas.server.admin;
 
 import com.siguldastakas.server.admin.data.DataModel;
-import com.siguldastakas.server.admin.data.Event;
 import com.siguldastakas.server.admin.view.AuthController;
 import com.siguldastakas.server.admin.view.EventController;
 import com.siguldastakas.server.admin.view.SeriesController;
@@ -18,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.TimeZone;
 
 import static spark.Spark.*;
-import static spark.Spark.get;
 
 public class AdminService implements SparkApplication {
 
@@ -44,7 +42,9 @@ public class AdminService implements SparkApplication {
 
             before(Path.path(Path.SERIES), AuthController.filter);
             before(Path.path(Path.SERIES, "*"), AuthController.filter);
+
             get(Path.path(Path.SERIES), SeriesController.list, freemarker);
+            post(Path.path(Path.SERIES, "update"), SeriesController.update);
             get(Path.path(Path.SERIES, ":path"), SeriesController.view, freemarker);
             get(Path.path(Path.SERIES, ":path", ":event"), EventController.view, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "upload"), EventController.upload, freemarker);
