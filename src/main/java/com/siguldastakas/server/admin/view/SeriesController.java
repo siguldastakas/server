@@ -45,12 +45,8 @@ public class SeriesController {
         Series series = DataModel.instance().series(path);
         if (series == null) halt(404);
 
-        boolean overall = DataModel.instance().hasOverallResults(path);
-        boolean[] results = new boolean[series.events.length];
-        for (int e = 0; e < results.length; e++) results[e] = DataModel.instance().hasResults(path, series.events[e].number);
-
         java.nio.file.Path outputPath = Paths.get((String) ContextHelper.lookup("outputPath"));
-        SeriesPage.process(series, overall, results, outputPath.resolve(path));
+        SeriesPage.process(series, outputPath.resolve(path));
         res.redirect(Path.path(req, Path.SERIES, path));
         return "Updated!";
     };

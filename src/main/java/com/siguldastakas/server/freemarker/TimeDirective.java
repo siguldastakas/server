@@ -1,4 +1,4 @@
-package com.siguldastakas.server.admin.view;
+package com.siguldastakas.server.freemarker;
 
 import freemarker.core.Environment;
 import freemarker.template.*;

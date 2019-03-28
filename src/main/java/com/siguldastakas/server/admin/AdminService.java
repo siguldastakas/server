@@ -4,7 +4,7 @@ import com.siguldastakas.server.admin.data.DataModel;
 import com.siguldastakas.server.admin.view.AuthController;
 import com.siguldastakas.server.admin.view.EventController;
 import com.siguldastakas.server.admin.view.SeriesController;
-import com.siguldastakas.server.admin.view.TimeDirective;
+import com.siguldastakas.server.freemarker.TimeDirective;
 import freemarker.template.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

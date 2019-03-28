@@ -10,6 +10,8 @@ import com.siguldastakas.server.admin.data.*;
 import com.siguldastakas.server.admin.data.overall.OverallResults;
 import com.siguldastakas.server.admin.data.overall.OverallResultsBuilder;
 import com.siguldastakas.server.admin.iofxml.*;
+import com.siguldastakas.server.output.EventPage;
+import com.siguldastakas.server.output.SeriesPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Request;
@@ -242,6 +244,10 @@ public class EventController {
         }
         OverallResults overallResults = OverallResultsBuilder.build(series, eventResults);
         DataModel.instance().save(series.path, overallResults);
+
+        java.nio.file.Path outputPath = Paths.get((String) ContextHelper.lookup("outputPath")).resolve(series.path);
+        SeriesPage.process(series, outputPath);
+        EventPage.process(series, event, results, outputPath);
 
         res.redirect(Path.path(req, Path.SERIES, series.path, String.valueOf(event.number)));
         return "Saved!";
