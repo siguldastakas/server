@@ -171,9 +171,17 @@ public class EventController {
                         runner.results = new RunnerResult[races];
                         for (Result result : personResult.results) {
                             int r = courseIndexes.get(result.course.id);
-                            runner.results[r] = new RunnerResult();
-                            runner.results[r].status = status(result.status);
-                            if (runner.results[r].status == RunnerResult.Status.OK) runner.results[r].time = result.time;
+                            if (runner.results[r] == null) {
+                                runner.results[r] = new RunnerResult();
+                                runner.results[r].status = status(result.status);
+                                if (runner.results[r].status == RunnerResult.Status.OK) runner.results[r].time = result.time;
+                            }
+                        }
+                        for (int r = 0; r < races; r++) {
+                            if (runner.results[r] == null) {
+                                runner.results[r] = new RunnerResult();
+                                runner.results[r].status = RunnerResult.Status.DNS;
+                            }
                         }
                     }
 
@@ -258,6 +266,7 @@ public class EventController {
         if ("MissingPunch".equals(string)) return RunnerResult.Status.MP;
         if ("Disqualified".equals(string)) return RunnerResult.Status.DSQ;
         if ("DidNotStart".equals(string)) return RunnerResult.Status.DNS;
+        if ("Inactive".equals(string)) return RunnerResult.Status.DNS;
         return null;
     }
 
