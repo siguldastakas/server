@@ -25,8 +25,8 @@
                                 <#list runner.results as result>
                                     <#if result.time gt 0>
                                         <td class="time details"><@time seconds=result.time /></td>
-                                        <td class="time-behind details">+<@time seconds=result.timeBehind /></td>
-                                        <td class="position-details details">(${result.position})</td>
+                                        <td class="time-behind details small">+<@time seconds=result.timeBehind /></td>
+                                        <td class="position-details details small">(${result.position})</td>
                                     <#else>
                                         <td class="status" colspan="3">${result.status}</td>
                                     </#if>
@@ -34,7 +34,7 @@
                             </#if>
                             <#if runner.overall.time gt 0>
                                 <td class="time"><@time seconds=runner.overall.time /></td>
-                                <td class="time-behind">+<@time seconds=runner.overall.timeBehind /></td>
+                                <td class="time-behind small">+<@time seconds=runner.overall.timeBehind /></td>
                             <#else>
                                 <td class="status" colspan="2">${runner.overall.status}</td>
                             </#if>

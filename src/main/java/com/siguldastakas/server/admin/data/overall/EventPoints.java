@@ -8,4 +8,12 @@ public class EventPoints {
     public EventPoints(int points) {
         this.points = points;
     }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public boolean isUsed() {
+        return used;
+    }
 }

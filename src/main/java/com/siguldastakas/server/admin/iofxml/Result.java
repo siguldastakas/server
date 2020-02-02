@@ -11,6 +11,12 @@ public class Result {
     @JsonProperty("Time")
     public int time;
 
+    @JsonProperty("TimeBehind")
+    public int timeBehind;
+
+    @JsonProperty("Position")
+    public int position;
+
     @JsonProperty("Status")
     public String status;
 

@@ -130,17 +130,19 @@ table.index {
 .results .time-behind {
     width: 35px;
     text-align: right;
-    font-size: 11px;
 }
 
 .results .position-details {
     width: 20px;
     text-align: right;
-    font-size: 11px;
 }
 
 .results .details {
     color: darkgrey;
+}
+
+.results .small {
+    font-size: 11px;
 }
 
 .results .status {
@@ -152,3 +154,4 @@ table.index {
     width: 40px;
     text-align: right;
 }
+

@@ -72,6 +72,19 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <packagingExcludes>
+                        WEB-INF/lib/jetty-*.jar,
+                        WEB-INF/lib/websocket-*.jar,
+                        WEB-INF/lib/slf4j-*.jar,
+                        WEB-INF/lib/simple-jndi-*.jar
+                    </packagingExcludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

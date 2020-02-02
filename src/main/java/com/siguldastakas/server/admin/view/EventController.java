@@ -11,6 +11,7 @@ import com.siguldastakas.server.admin.data.overall.OverallResults;
 import com.siguldastakas.server.admin.data.overall.OverallResultsBuilder;
 import com.siguldastakas.server.admin.iofxml.*;
 import com.siguldastakas.server.output.EventPage;
+import com.siguldastakas.server.output.OverallPage;
 import com.siguldastakas.server.output.SeriesPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,17 +158,26 @@ public class EventController {
                     runner.name = personResult.person.name.given + " " + personResult.person.name.family;
                     runner.club = personResult.organization.name;
 
-                    OverallResult overallResult = personResult.results[races - 1].overallResult;
+                    if (races == 1) {
+                        Result result = personResult.results[0];
+                        runner.overall = new RunnerResult();
+                        runner.overall.status = status(result.status);
+                        if (runner.overall.status == RunnerResult.Status.OK) {
+                            runner.overall.time = result.time;
+                            runner.overall.timeBehind = result.timeBehind;
+                            runner.overall.position = result.position;
+                        }
+                    } else {
+                        OverallResult overallResult = personResult.results[races - 1].overallResult;
 
-                    runner.overall = new RunnerResult();
-                    runner.overall.status = status(overallResult.status);
-                    if (runner.overall.status == RunnerResult.Status.OK) {
-                        runner.overall.time = overallResult.time;
-                        runner.overall.timeBehind = overallResult.timeBehind;
-                        runner.overall.position = overallResult.position;
-                    }
+                        runner.overall = new RunnerResult();
+                        runner.overall.status = status(overallResult.status);
+                        if (runner.overall.status == RunnerResult.Status.OK) {
+                            runner.overall.time = overallResult.time;
+                            runner.overall.timeBehind = overallResult.timeBehind;
+                            runner.overall.position = overallResult.position;
+                        }
 
-                    if (races > 1) {
                         runner.results = new RunnerResult[races];
                         for (Result result : personResult.results) {
                             int r = courseIndexes.get(result.course.id);
@@ -256,6 +266,7 @@ public class EventController {
         java.nio.file.Path outputPath = Paths.get((String) ContextHelper.lookup("outputPath")).resolve(series.path);
         SeriesPage.process(series, outputPath);
         EventPage.process(series, event, results, outputPath);
+        OverallPage.process(series, overallResults, outputPath);
 
         res.redirect(Path.path(req, Path.SERIES, series.path, String.valueOf(event.number)));
         return "Saved!";
@@ -265,6 +276,7 @@ public class EventController {
         if ("OK".equals(string)) return RunnerResult.Status.OK;
         if ("MissingPunch".equals(string)) return RunnerResult.Status.MP;
         if ("Disqualified".equals(string)) return RunnerResult.Status.DSQ;
+        if ("DidNotFinish".equals(string)) return RunnerResult.Status.DNF;
         if ("DidNotStart".equals(string)) return RunnerResult.Status.DNS;
         if ("Inactive".equals(string)) return RunnerResult.Status.DNS;
         return null;

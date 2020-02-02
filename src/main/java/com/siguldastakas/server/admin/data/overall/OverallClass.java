@@ -10,4 +10,12 @@ public class OverallClass {
         this.runners = runners;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public OverallRunner[] getRunners() {
+        return runners;
+    }
+
 }

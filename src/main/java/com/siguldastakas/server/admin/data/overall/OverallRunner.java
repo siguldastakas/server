@@ -13,4 +13,24 @@ public class OverallRunner {
         this.eventPoints = new EventPoints[eventsSize];
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getClub() {
+        return club;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public EventPoints[] getEventPoints() {
+        return eventPoints;
+    }
+
 }

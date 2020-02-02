@@ -41,7 +41,7 @@ public class OverallResultsBuilder {
                        points.used = true;
                    }
                } else {
-                   sortedPoints.sort(Comparator.comparing(o -> o.points));
+                   sortedPoints.sort(Comparator.comparing(o -> - o.points));
                    for (int p = 0; p < seriesClass.overallResults; p++) {
                        EventPoints points = sortedPoints.get(p);
                        runner.points += points.points;

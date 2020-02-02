@@ -3,7 +3,7 @@ package com.siguldastakas.server.admin.data;
 public class RunnerResult implements Comparable<RunnerResult> {
 
     public enum Status {
-        OK, MP, DSQ, DNS
+        OK, MP, DSQ, DNF, DNS
     }
 
     public Status status;
