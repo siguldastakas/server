@@ -8,6 +8,11 @@
             <p class="warning">Rezultāti nav saglabāti!</p>
         </#if>
     </section>
+    <#if lofXml??>
+    <section>
+        <a href="${lofXml}">LOF XML</a>
+    </section>
+    </#if>
     <section>
         <form action="${upload}" method="post" enctype="multipart/form-data">
             <label>Augšupielādēt rezultātus:</label>

@@ -91,10 +91,14 @@ public class EventController {
     private static final String SESSION_SERIES = "series";
     private static final String SESSION_EVENT = "event";
     private static final String SESSION_RESULTS = "results";
+    private static final String SESSION_LOF_XML = "lofXml";
 
     public static final EventViewRoute view = (series, event, model, req, res) -> {
         model.put("event", event);
         model.put("saved", DataModel.instance().hasResults(series.path, event.number));
+        if (DataModel.instance().hasLofXml(series.path, event.number)) {
+            model.put("lofXml", Path.path(req, Path.SERIES, series.path, String.valueOf(event.number), "lofXml"));
+        }
         model.put("upload", Path.path(req, Path.SERIES, series.path, String.valueOf(event.number), "upload"));
         model.template("event/view.ftl");
     };
@@ -143,11 +147,15 @@ public class EventController {
                     Arrays.sort(courses, Comparator.comparing(o -> o.name));
 
                     runnerClass.courses = new String[races];
+                    runnerClass.coursesXml = new Course[races];
                     courseIndexes = new HashMap<>();
                     for (int i = 0; i < races; i++) {
                         runnerClass.courses[i] = courses[i].name;
+                        runnerClass.coursesXml[i] = courses[i];
                         courseIndexes.put(courses[i].id, i);
                     }
+                } else {
+                    runnerClass.courseXml = cls.course;
                 }
 
                 Runner[] runners = new Runner[cls.personResults.length];
@@ -157,10 +165,13 @@ public class EventController {
                     Runner runner = new Runner();
                     runner.name = personResult.person.name.given + " " + personResult.person.name.family;
                     runner.club = personResult.organization.name;
+                    runner.personXml = personResult.person;
+                    runner.organizationXml = personResult.organization;
 
                     if (races == 1) {
                         Result result = personResult.results[0];
                         runner.overall = new RunnerResult();
+                        runner.overall.xml = result;
                         runner.overall.status = status(result.status);
                         if (runner.overall.status == RunnerResult.Status.OK) {
                             runner.overall.time = result.time;
@@ -183,6 +194,7 @@ public class EventController {
                             int r = courseIndexes.get(result.course.id);
                             if (runner.results[r] == null) {
                                 runner.results[r] = new RunnerResult();
+                                runner.results[r].xml = result;
                                 runner.results[r].status = status(result.status);
                                 if (runner.results[r].status == RunnerResult.Status.OK) runner.results[r].time = result.time;
                             }
@@ -213,8 +225,8 @@ public class EventController {
                         int rank1 = 1;
                         int best1 = sorted[0].results[i].time;
                         for (Runner runner : sorted) {
+                            runner.results[i].timeBehind = runner.results[i].time - best1;
                             if (runner.results[i].status == RunnerResult.Status.OK) {
-                                runner.results[i].timeBehind = runner.results[i].time - best1;
                                 runner.results[i].position = rank1++;
                             }
                         }
@@ -229,6 +241,63 @@ public class EventController {
             eventResults.classes = classes.stream().sorted(Comparator.comparing(o -> series.indexOfClass(o.name))).toArray(RunnerClass[]::new);
 
             session.attribute(SESSION_RESULTS, eventResults);
+
+            ResultList lofResultList = new ResultList();
+            lofResultList.event = resultList.event;
+
+            List<ClassResult> classResultList = new ArrayList<>();
+            for (RunnerClass cls : eventResults.classes) {
+                if (cls.courses != null) {
+                    for (int i = 0; i < cls.courses.length; i++) {
+                        ClassResult classResult = new ClassResult();
+                        classResult.classDetails = new ClassDetails();
+                        classResult.classDetails.name = cls.name + "-" + (i + 1);
+                        classResult.course = cls.coursesXml[i];
+                        classResultList.add(classResult);
+
+                        List<PersonResult> personResultList = new ArrayList<>();
+                        for (Runner runner : cls.runners) {
+                            if (runner.results[i].status != RunnerResult.Status.DNS) {
+                                PersonResult personResult = new PersonResult();
+                                personResult.person = runner.personXml;
+                                personResult.organization = runner.organizationXml;
+                                personResult.results = new Result[]{runner.results[i].xml};
+                                personResult.results[0].raceNumber = null;
+                                personResult.results[0].timeBehind = runner.results[i].timeBehind;
+                                personResult.results[0].position = runner.results[i].position;
+                                personResult.results[0].overallResult = null;
+                                personResult.results[0].course = null;
+                                personResultList.add(personResult);
+                            }
+                        }
+                        classResult.personResults = personResultList.toArray(new PersonResult[0]);
+                    }
+                } else {
+                    ClassResult classResult = new ClassResult();
+                    classResult.classDetails = new ClassDetails();
+                    classResult.classDetails.name = cls.name;
+                    classResult.course = cls.courseXml;
+                    classResultList.add(classResult);
+
+                    List<PersonResult> personResultList = new ArrayList<>();
+                    for (Runner runner : cls.runners) {
+                        if (runner.overall.status != RunnerResult.Status.DNS) {
+                            PersonResult personResult = new PersonResult();
+                            personResult.person = runner.personXml;
+                            personResult.organization = runner.organizationXml;
+                            personResult.results = new Result[]{runner.overall.xml};
+                            personResult.results[0].raceNumber = null;
+                            personResult.results[0].overallResult = null;
+                            personResult.results[0].course = null;
+                            personResultList.add(personResult);
+                        }
+                    }
+                    classResult.personResults = personResultList.toArray(new PersonResult[0]);
+                }
+            }
+            lofResultList.classResults = classResultList.toArray(new ClassResult[0]);
+
+            session.attribute(SESSION_LOF_XML, lofResultList);
 
             model.put("event", event);
             model.put("classes", eventResults.classes);
@@ -251,7 +320,8 @@ public class EventController {
         }
 
         EventResults results = session.attribute(SESSION_RESULTS);
-        DataModel.instance().save(series.path, event.number, results, uploadPath.resolve(file));
+        ResultList lofXml = session.attribute(SESSION_LOF_XML);
+        DataModel.instance().save(series.path, event.number, results, lofXml, uploadPath.resolve(file));
 
         EventResults[] eventResults = new EventResults[series.events.length];
         for (int e = 0; e < series.events.length; e++) {
@@ -270,6 +340,15 @@ public class EventController {
 
         res.redirect(Path.path(req, Path.SERIES, series.path, String.valueOf(event.number)));
         return "Saved!";
+    };
+
+    public static EventRoute lofXml = (series, event, req, res) -> {
+        if (DataModel.instance().hasLofXml(series.path, event.number)) {
+            res.type("text/xml");
+            res.header("Content-disposition", "attachment; filename=results" + event.number + "-lof.xml");
+            return DataModel.instance().lofXml(series.path, event.number);
+        }
+        return null;
     };
 
     private static RunnerResult.Status status(String string) {

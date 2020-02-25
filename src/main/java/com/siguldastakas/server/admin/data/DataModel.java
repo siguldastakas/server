@@ -1,13 +1,19 @@
 package com.siguldastakas.server.admin.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.siguldastakas.server.admin.data.overall.OverallResults;
+import com.siguldastakas.server.admin.iofxml.ResultList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,12 +43,16 @@ public class DataModel {
     private static final String OVERALL = "overall.json";
 
     private final ObjectMapper mapper;
+    private final XmlMapper xmlMapper;
     private Path dataPath;
 
     private DataModel(Path dataPath) {
         this.dataPath = dataPath;
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        xmlMapper = new XmlMapper();
+        xmlMapper.configure(ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true);
+        xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     public boolean isAdmin(String email) {
@@ -104,8 +114,16 @@ public class DataModel {
         return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + ".json");
     }
 
+    private Path lofXmlPath(String path, int number) {
+        return dataPath.resolve(SERIES).resolve(path).resolve(RESULTS + number + "-lof.xml");
+    }
+
     public boolean hasResults(String path, int number) {
         return Files.exists(resultsPath(path, number));
+    }
+
+    public boolean hasLofXml(String path, int number) {
+        return Files.exists(lofXmlPath(path, number));
     }
 
     public EventResults results(String path, int number) {
@@ -121,7 +139,17 @@ public class DataModel {
         return null;
     }
 
-    public void save(String path, int number, EventResults results, Path xml) {
+    public InputStream lofXml(String path, int number) {
+        try {
+            return new FileInputStream(lofXmlPath(path, number).toFile());
+        } catch (IOException e) {
+            log.error("Failed to read series", e);
+        }
+
+        return null;
+    }
+
+    public void save(String path, int number, EventResults results, ResultList lofXml, Path xml) {
         try {
             synchronized (mapper) {
                 String name = RESULTS + number;
@@ -131,6 +159,9 @@ public class DataModel {
 
                 Path path2 = directory.resolve(name + ".xml");
                 Files.move(xml, path2, REPLACE_EXISTING);
+
+                Path path3 = directory.resolve(name + "-lof.xml");
+                xmlMapper.writeValue(path3.toFile(), lofXml);
             }
         } catch (IOException e) {
             log.error("Failed to write results", e);

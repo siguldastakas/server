@@ -1,10 +1,15 @@
 package com.siguldastakas.server.admin.data;
 
+import com.siguldastakas.server.admin.iofxml.Course;
+
 public class RunnerClass implements Comparable<RunnerClass> {
 
     public String name;
     public String[] courses;
     public Runner[] runners;
+
+    public Course courseXml;
+    public Course[] coursesXml;
 
     public String getName() {
         return name;

@@ -50,6 +50,7 @@ public class AdminService implements SparkApplication {
             get(Path.path(Path.SERIES, ":path", ":event"), EventController.view, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "upload"), EventController.upload, freemarker);
             post(Path.path(Path.SERIES, ":path", ":event", "save"), EventController.save);
+            get(Path.path(Path.SERIES, ":path", ":event", "lofXml"), EventController.lofXml);
 
         } catch (NamingException e) {
             log.error("Failed to setup admin panel!", e);

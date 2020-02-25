@@ -1,5 +1,7 @@
 package com.siguldastakas.server.admin.data;
 
+import com.siguldastakas.server.admin.iofxml.Result;
+
 public class RunnerResult implements Comparable<RunnerResult> {
 
     public enum Status {
@@ -10,6 +12,8 @@ public class RunnerResult implements Comparable<RunnerResult> {
     public int time;
     public int timeBehind;
     public int position;
+
+    public Result xml;
 
     public Status getStatus() {
         return status;

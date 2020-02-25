@@ -12,4 +12,7 @@ public class ClassResult {
     @JsonProperty("PersonResult")
     public PersonResult[] personResults;
 
+    @JsonProperty("Course")
+    public Course course;
+
 }

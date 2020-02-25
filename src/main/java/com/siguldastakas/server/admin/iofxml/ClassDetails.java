@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ClassDetails {
 
     @JsonProperty("Id")
-    public int id;
+    public Integer id;
 
     @JsonProperty("Name")
     public String name;

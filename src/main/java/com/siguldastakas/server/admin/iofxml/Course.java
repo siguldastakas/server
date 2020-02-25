@@ -10,4 +10,7 @@ public class Course {
     @JsonProperty("Name")
     public String name;
 
+    @JsonProperty("Length")
+    public Integer length;
+
 }
