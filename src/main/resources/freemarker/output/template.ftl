@@ -5,7 +5,7 @@
     <title>${title}</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.css?ts=${.now?long?c}">
 </head>
 
 <body>

@@ -11,7 +11,7 @@
                     <tr>
                         <th>&nbsp;</th>
                         <th class="name">Vārds, uzvārds</th>
-                        <th class="left">Klubs</th>
+                        <th class="club">Klubs</th>
                         <#if class.courses??><#list class.courses as course><th colspan="3">${course}</th></#list></#if>
                         <th colspan="2">Laiks</th>
                         <th class="points">Punkti</th>
@@ -20,7 +20,7 @@
                         <tr>
                             <td class="position"><#if runner.overall.position gt 0>${runner.overall.position}<#else>&nbsp;</#if></td>
                             <td class="name">${runner.name}</td>
-                            <td class="left">${runner.club}</td>
+                            <td class="club">${runner.club}</td>
                             <#if class.courses??>
                                 <#list runner.results as result>
                                     <#if result.time gt 0>

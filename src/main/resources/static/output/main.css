@@ -13,15 +13,6 @@ img {
     margin: auto;
 }
 
-/*
-@media only screen and (max-width: 809px) {
-    .width-limit {
-        width: calc(100vw - 10px);
-        padding: 0 5px;
-    }
-}
-*/
-
 header {
     text-align: center;
     border-bottom: solid 1px darkorange;
@@ -105,11 +96,13 @@ table.index {
 .results th {
     font-size: 11px;
     padding: 7px;
+    white-space: nowrap;
 }
 
 .results td {
     font-size: 13px;
     padding: 7px;
+    white-space: nowrap;
 }
 
 .results .position {
@@ -120,6 +113,14 @@ table.index {
 .results .name {
     width: 170px;
     text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.results .club {
+    text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .results .time {
@@ -155,3 +156,40 @@ table.index {
     text-align: right;
 }
 
+@media only screen and (max-width: 1010px) {
+    .width-limit {
+        width: 100%;
+        padding: 0;
+    }
+
+    section {
+        padding: 15px 0px;
+    }
+
+    h2 {
+        padding-left: 7px;
+        padding-bottom: 3px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .results .hidden-600 {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .results .club {
+        max-width: calc((100vw - 31px - 184px - 14px - 54px));
+    }
+}
+
+@media only screen and (max-width: 370px) {
+    .results .name {
+        width: auto;
+    }
+
+    .results .club {
+        display: none;
+    }
+}
